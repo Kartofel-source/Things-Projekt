@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>ESP32 LED Steuerung</title>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <style>
+    body { text-align: center; font-family: Arial; margin-top: 50px; }
+    h2 { color: #333; }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+    .switch input { display: none; }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px; width: 26px;
+      left: 4px; bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #4CAF50;
+    }
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+  </style>
+</head>
+<body>
+  <h2>ESP32 LED Steuerung</h2>
+  <label class="switch">
+    <input type="checkbox" id="ledSwitch">
+    <span class="slider"></span>
+  </label>
+
+  <script>
+    // === HIER DEINE HIVE-MQ CLOUD DATEN EINFÜGEN ===
+    const brokerHostname = '08ab1488ead64174985d55277a7278fc.s1.eu.hivemq.cloud'; // z.B. xyz123.s1.eu.hivemq.cloud
+    const brokerUsername = 'Test12345';
+    const brokerPassword = 'Mar1809lon';
+    const brokerPort = 8884; // WSS/TLS für WebSocket
+
+    // MQTT Verbindung herstellen
+    const client = mqtt.connect(`wss://${brokerHostname}:${brokerPort}/mqtt`, {
+      username: brokerUsername,
+      password: brokerPassword
+    });
+
+    client.on('connect', function () {
+      console.log('Verbunden mit HiveMQ Cloud Broker');
+    });
+
+    client.on('error', function (err) {
+      console.error('MQTT Fehler:', err);
+    });
+
+    // LED Slider
+    const slider = document.getElementById('ledSwitch');
+    slider.addEventListener('change', function() {
+      if(slider.checked) {
+        client.publish('home/led', 'on');  // Topic home/led
+      } else {
+        client.publish('home/led', 'off');
+      }
+    });
+  </script>
+</body>
+</html>
